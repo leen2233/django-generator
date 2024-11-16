@@ -1,0 +1,16 @@
+[project]
+name = "django-ai-generator"
+version = "0.1.0"
+description = "AI-powered Django project generator using Google Gemini"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+dependencies = [
+    "click>=8.1.0",
+    "google-generativeai>=0.3.0",
+    "pyyaml>=6.0.1",
+    "rich>=13.0.0",
+]
+
+[project.scripts]
+django-gen = "django_ai_generator.cli:main"
