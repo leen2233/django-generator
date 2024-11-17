@@ -37,12 +37,21 @@ The responses should be split into three categories:
        "value": "authentication.User",
        "type": "update_settings"}
        ```
+4. **Dependency Install**
+   - Include dependency packages to install in group
+   - Each dependency must have a `dependencies` key in type array, and content it  names of packages, and a `type` set to `"dependencies"`.
+   - Example:
+     ```json
+     [{"dependencies": ["djangorestframework", "phonenumber"], "type": "dependencies"}]
+     ```
+
 ---
 ### Key Rules:
 1. **No Markdown**: Responses must be plain JSON with no Markdown formatting.
 2. **Template Content Only**: Responses must not include real passwords, API keys, or any copyrighted material. Use placeholders or templates where necessary.
 3. **Full File Content**: Always include the complete content of a file when providing file modifications or creation instructions.
 4. **Project Info**: Assume the project was created with `django-admin startproject`, and the project name is `testt`.
+5. Don't give install dependency as command, only in type dependencies
 ---
 ### Example Scenario:
 If the user specifies that they want to add `rest_framework` to `INSTALLED_APPS`, the response should look like this:

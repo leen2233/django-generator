@@ -41,7 +41,7 @@ class GeminiClient:
                 data = response.json()
                 if not data.get("candidates", [{}])[0].get("finishReason") == "RECITATION":
                     try:
-                        content = self._get_response_text(data)
+                        content = self._parse_response(data)
                         break
                     except:
                         continue
@@ -51,6 +51,13 @@ class GeminiClient:
         except Exception as e:
             console.print(f"[red]Error getting instructions from Gemini API: {str(e)}[/red]")
             raise
+
+    def refactor_dependencies(self, dependencies: List[Dict[str, str]]):
+        prompt = "I got errors when instaling this packages. please refactor it:\n"
+        prompt += "\n".join([f"name: {item['name']}, error: {item['error']}" for item in dependencies])
+        prompt += 'give in format: [{"dependencies": ["djangorestframework", "phonenumber"], "type": "dependencies"}]'
+        prompt += 'give only refactored dependencies, others are already installed'
+        return self._send_request(prompt)
 
     def _build_authentication_prompt(self, type: str, custom_description: str = None) -> str:
         return f"""
@@ -92,7 +99,7 @@ class GeminiClient:
                 data = response.json()
                 if not data.get("candidates", [{}])[0].get("finishReason") == "RECITATION":
                     try:
-                        content = self._get_response_text(data)
+                        content = self._parse_response(data)
                         break
                     except:
                         continue
@@ -104,7 +111,7 @@ class GeminiClient:
             console.print(f"[red]Error getting instructions from Gemini API: {str(e)}[/red]")
             raise
 
-    def _get_response_text(self, response: dict) -> dict:
+    def _parse_response(self, response: dict) -> dict:
         try:
             response = response.get("candidates", [{}])[0]
             response = response.get("content", {}).get("parts", [{}])[0]
@@ -115,5 +122,3 @@ class GeminiClient:
             raise
         pprint(content)
         return content
-
-

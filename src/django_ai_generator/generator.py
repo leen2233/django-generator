@@ -20,9 +20,10 @@ class ProjectGenerator:
         """Main method to generate the project."""
         try:
             self._create_project()
-            authentication_type = next((feature['authentication'] for feature in self.features if "authentication" in feature), None)
-            if authentication_type:
-                instructions = self.api_client.get_authentication_instructions(authentication_type)
+            authentication = next((feature for feature in self.features if "authentication_type" in feature), None)
+            if authentication:
+                instructions = self.api_client.get_authentication_instructions(authentication.get("authentication_type"),
+                                                                               authentication.get("authentication_prompt"))
                 self.run_instructions(instructions)
             # Additional setup based on features can be implemented here
         except Exception as e:
@@ -36,6 +37,8 @@ class ProjectGenerator:
                 self._configure_file(instruction)
             elif instruction.get("type") == "update_settings":
                 self._update_settings(instruction)
+            elif instruction.get("type") == "dependencies":
+                self._install_dependencies(instruction.get("dependencies"))
 
     def _install_django(self):
         """Install Django using pip."""
@@ -95,8 +98,24 @@ class ProjectGenerator:
             key = instruction.get("variable_name")
             value = instruction.get("value")
             action = instruction.get("action")
-            self.file_manager.update_settings(key, value, action)
+            self.file_manager.update_setting(key, value, action)
             console.print("[green]Settings updated successfully![/green]")
         except Exception as e:
             console.print(f"[red]Failed to update settings: {e}[/red]")
             raise
+
+    def _install_dependencies(self, dependencies: List[str]):
+        """Install a dependencies using pip."""
+        failed_dependencies = list()
+        for dependency in dependencies:
+            console.print(f"[yellow]Installing dependency: {dependency}...[/yellow]")
+            try:
+                subprocess.check_call(["pip", "install", dependency])
+                console.print("[green]Dependency installed successfully![/green]")
+            except subprocess.CalledProcessError as e:
+                failed_dependencies.append({"name": dependency, "error": e})
+        if failed_dependencies:
+            # Refactor failed dependencies
+            console.print(f"[red]Failed dependency: {failed_dependencies}![/red]")
+            refactored_deps = self.api_client.refactor_dependencies(failed_dependencies)
+            self._install_dependencies(refactored_deps[0].get("dependencies"))

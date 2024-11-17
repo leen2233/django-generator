@@ -38,18 +38,18 @@ def main():
         console.print("[yellow]Please choose a different project name[/yellow]")
 
     # Framework selection
-    project_type = prompt([
-        {
-            "type": "list",
-            "name": "project_type",
-            "message": "Select project type:",
-            "choices": [Choice("django", "Django"), Choice("drf", "Django REST Framework")],
-        }
-    ])["project_type"]
+    # project_type = prompt([
+    #     {
+    #         "type": "list",
+    #         "name": "project_type",
+    #         "message": "Select project type:",
+    #         "choices": [Choice("django", "Django"), Choice("drf", "Django REST Framework")],
+    #     }
+    # ])["project_type"]
 
     # Initialize features list
-    features = [{"project_type": project_type}]
-
+    # features = [{"project_type": project_type}]
+    features = []
     # Authentication setup
     if Confirm.ask("Include authentication?"):
         auth_type = prompt([
@@ -65,7 +65,14 @@ def main():
                 ],
             }
         ])["auth_type"]
-        features.append({"authentication": auth_type})
+        custom_desription = prompt([
+            {
+                "type": "input",
+                "name": "description",
+                "message": "Describe authentication:",
+            }
+        ])["description"]
+        features.append({"authentication_type": auth_type, "authentication_prompt": custom_desription})
     #
     # # Custom apps
     # if Confirm.ask("Add custom apps?"):

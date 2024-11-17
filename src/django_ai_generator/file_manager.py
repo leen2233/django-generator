@@ -8,15 +8,18 @@ from typing import Dict, Any, Optional
 class FileManager:
     def __init__(self, project_name):
         self.project_name = project_name
-        self.settings_path = Path(os.path.join(project_name, "settings.py"))
-        if not self.settings_path.exists():
-            raise FileNotFoundError(f"Settings file not found at {self.settings_path}")
+        self.settings_path = None
 
     def create_file(self, path: str, content: str = ""):
         """Create a file and write content to it."""
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, 'w') as f:
             f.write(content)
+
+    def _load_settings(self):
+        self.settings_path = Path(os.path.join(self.project_name, "settings.py"))
+        if not self.settings_path.exists():
+            raise FileNotFoundError(f"Settings file not found at {self.settings_path}")
 
     def _read_settings(self) -> str:
         return self.settings_path.read_text()
@@ -64,13 +67,14 @@ class FileManager:
             return start_pos, end_pos
 
     def update_setting(self, variable_name: str, value: Any, operation_type: Optional[str] = None):
+        self._load_settings()
         content = self._read_settings()
         var_pos = self._find_variable(content, variable_name)
 
         if var_pos is None and operation_type in ('add', 'remove'):
             raise ValueError(f"Cannot {operation_type} from non-existent variable {variable_name}")
 
-        if operation_type is None:
+        if operation_type is None or operation_type == "set":
             new_value = self._parse_value(value)
             if var_pos is None:
                 if content and not content.endswith('\n'):
