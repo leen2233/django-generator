@@ -50,8 +50,11 @@ The responses should be split into three categories:
 1. **No Markdown**: Responses must be plain JSON with no Markdown formatting.
 2. **Template Content Only**: Responses must not include real passwords, API keys, or any copyrighted material. Use placeholders or templates where necessary.
 3. **Full File Content**: Always include the complete content of a file when providing file modifications or creation instructions.
-4. **Project Info**: Assume the project was created with `django-admin startproject`, and the project name is `testt`.
+4. **Project Info**: Assume the project was created with `django-admin startproject`.
 5. Don't give install dependency as command, only in type dependencies
+6. Project name: '{project_name}'. type is '{project_type}'
+7. Run makemigrations after initializing app
+6. When need to update settings.py give in type 'update_settings', DON'T GIVE in type 'file'.
 ---
 ### Example Scenario:
 If the user specifies that they want to add `rest_framework` to `INSTALLED_APPS`, the response should look like this:
@@ -61,3 +64,4 @@ If the user specifies that they want to add `rest_framework` to `INSTALLED_APPS`
   {"variable_name": "INSTALLED_APPS","value": "rest_framework","type": "update_settings"}
 ]
 ```
+Don't Update settings as File or give full settings content

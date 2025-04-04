@@ -3,7 +3,7 @@ name = "django-ai-generator"
 version = "0.1.0"
 description = "AI-powered Django project generator using Google Gemini"
 authors = [
-    {name = "Your Name", email = "your.email@example.com"},
+    {name = "Arslan Rejebov", email = "arslanrejepow223@gmail.com"},
 ]
 dependencies = [
     "click>=8.1.0",

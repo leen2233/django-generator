@@ -9,8 +9,9 @@ console = Console()
 
 
 class GeminiClient:
-    def __init__(self, project_name):
+    def __init__(self, project_name: str, options: Dict = None):
         self.project_name = project_name
+        self.options = options or {}
         self.api_key = os.getenv("GEMINI_API_KEY")
         self.model = "gemini-exp-1114"
         if not self.api_key:
@@ -52,6 +53,11 @@ class GeminiClient:
             console.print(f"[red]Error getting instructions from Gemini API: {str(e)}[/red]")
             raise
 
+    def get_app_instructions(self, app: Dict):
+        prompt = (f"I need help to integrate {app['name']} into my project. Please provide me with the necessary files "
+                  f"and configurations to fully implement it. Description | Request: {app['description']}")
+        return self._send_request(prompt)
+
     def refactor_dependencies(self, dependencies: List[Dict[str, str]]):
         prompt = "I got errors when instaling this packages. please refactor it:\n"
         prompt += "\n".join([f"name: {item['name']}, error: {item['error']}" for item in dependencies])
@@ -76,7 +82,10 @@ class GeminiClient:
             script_dir = os.path.dirname(os.path.abspath(__file__))
             file_path = os.path.join(script_dir, "system_instructions.txt")
             with open(file_path, "r") as f:
-                self._system_instruction = f.read()
+                content = f.read()
+                content = content.replace("{project_name}", self.project_name)
+                content = content.replace("{project_type}", self.options.get("type"))
+                self._system_instruction = content
         except FileNotFoundError:
             console.print("[red]System instructions file not found. Please generate them using the 'generate_system_instructions.py' script and upload the resulting JSON file to the project directory.[/red]")
             raise
@@ -118,6 +127,7 @@ class GeminiClient:
             content = response.get("text").replace("```json", "").replace("```", "")
             content = json.loads(content)
         except Exception as e:
+            pprint(response)
             console.print("[red]Error parsing response from Gemini API: Invalid response format[/red]")
             raise
         pprint(content)

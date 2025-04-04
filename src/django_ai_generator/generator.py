@@ -10,22 +10,26 @@ console = Console()
 
 
 class ProjectGenerator:
-    def __init__(self, name: str, features: List[Dict]):
+    def __init__(self, name: str, options: Dict):
         self.name = name
-        self.features = features
-        self.api_client = GeminiClient(project_name=self.name)
+        self.options = options
+        self.api_client = GeminiClient(project_name=self.name, options=self.options)
         self.file_manager = FileManager(project_name=self.name)
 
     def generate(self):
         """Main method to generate the project."""
         try:
             self._create_project()
-            authentication = next((feature for feature in self.features if "authentication_type" in feature), None)
+            authentication = self.options.get("authentication")
             if authentication:
-                instructions = self.api_client.get_authentication_instructions(authentication.get("authentication_type"),
-                                                                               authentication.get("authentication_prompt"))
+                instructions = self.api_client.get_authentication_instructions(self.options.get("auth_type"),
+                                                                               self.options.get("auth_prompt"))
                 self.run_instructions(instructions)
-            # Additional setup based on features can be implemented here
+
+            for app in self.options.get("apps"):
+                instructions = self.api_client.get_app_instructions(app)
+                self.run_instructions(instructions)
+
         except Exception as e:
             console.print(f"[red]Project generation failed: {e}[/red]")
 
@@ -72,9 +76,10 @@ class ProjectGenerator:
     def _run_command(self, command: str):
         """Run a command in the project's root directory."""
         try:
-            console.print(f"[yellow]Running command: {command}...[/yellow]")
-            subprocess.check_call(command, shell=True)
-            console.print("[green]Command executed successfully![/green]")
+            if "makemigrations" not in command or "migrate" not in command:
+                console.print(f"[yellow]Running command: {command}...[/yellow]")
+                subprocess.check_call(command, shell=True)
+                console.print("[green]Command executed successfully![/green]")
         except subprocess.CalledProcessError as e:
             console.print(f"[red]Failed to run command: {e}[/red]")
             raise

@@ -37,57 +37,71 @@ def main():
             break
         console.print("[yellow]Please choose a different project name[/yellow]")
 
+    options = dict()
+
     # Framework selection
-    # project_type = prompt([
-    #     {
-    #         "type": "list",
-    #         "name": "project_type",
-    #         "message": "Select project type:",
-    #         "choices": [Choice("django", "Django"), Choice("drf", "Django REST Framework")],
-    #     }
-    # ])["project_type"]
+    project_type = prompt([
+        {
+            "type": "list",
+            "name": "project_type",
+            "message": "Select project type:",
+            "choices": [Choice("pure django with templates", "Django"), Choice("djangorestframework", "Django REST Framework")],
+        }
+    ])["project_type"]
 
     # Initialize features list
-    # features = [{"project_type": project_type}]
-    features = []
+    options["type"] = project_type
+
     # Authentication setup
     if Confirm.ask("Include authentication?"):
-        auth_type = prompt([
-            {
-                "type": "list",
-                "name": "auth_type",
-                "message": "Select authentication type:",
-                "choices": [
-                    Choice("jwt", "JWT"),
-                    Choice("token", "Token"),
-                    Choice("session", "Session"),
-                    Choice("oauth2", "OAuth2"),
-                ],
-            }
-        ])["auth_type"]
-        custom_desription = prompt([
+        options["authentication"] = True
+        if project_type == "djangorestframework":
+            auth_type = prompt([
+                {
+                    "type": "list",
+                    "name": "auth_type",
+                    "message": "Select authentication type:",
+                    "choices": [
+                        Choice("jwt", "JWT"),
+                        Choice("token", "Token"),
+                        Choice("session", "Session"),
+                        Choice("oauth2", "OAuth2"),
+                    ],
+                }
+            ])["auth_type"]
+            options["auth_type"] = auth_type
+
+        auth_description = prompt([
             {
                 "type": "input",
                 "name": "description",
                 "message": "Describe authentication:",
             }
         ])["description"]
-        features.append({"authentication_type": auth_type, "authentication_prompt": custom_desription})
-    #
-    # # Custom apps
-    # if Confirm.ask("Add custom apps?"):
-    #     apps = []
-    #     while Confirm.ask("Add another app?"):
-    #         app_description = prompt([
-    #             {
-    #                 "type": "input",
-    #                 "name": "description",
-    #                 "message": "Describe this app:",
-    #             }
-    #         ])["description"]
-    #         apps.append({"description": app_description})
-    #     features.append({"custom_apps": apps})
-    #
+        options["auth_prompt"] = auth_description
+
+    # Custom apps
+    if Confirm.ask("Add custom apps?"):
+        apps = []
+        while Confirm.ask("Add another app?"):
+            app_name = prompt([
+                {
+                    "type": "input",
+                    "name": "name",
+                    "message": "App name:",
+                }
+            ])["name"]
+            app_description = prompt([
+                {
+                    "type": "input",
+                    "name": "description",
+                    "message": "Describe this app:",
+                }
+            ])["description"]
+            apps.append({"name": app_name,
+                         "description": app_description})
+        options["apps"] = apps
+
     # project_features = []
     #
     # if Confirm.ask("Use environment variables (.env)?", default=True):
@@ -124,7 +138,7 @@ def main():
     # features.append({"project_features": project_features})
 
     # Initialize generator
-    generator = ProjectGenerator(project_name, features)
+    generator = ProjectGenerator(project_name, options)
 
     # Generate project
     with console.status("Generating project..."):
